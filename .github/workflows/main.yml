@@ -1,0 +1,38 @@
+
+name: Windows Cloud PC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Show Windows information
+        shell: pwsh
+        run: |
+          Write-Host "Windows cloud environment started"
+          Get-ComputerInfo |
+            Select-Object WindowsProductName,
+              WindowsVersion, OsArchitecture
+          Write-Host "Processor:"
+          Get-CimInstance Win32_Processor |
+            Select-Object -First 1 Name
+          Write-Host "Memory:"
+          Get-CimInstance Win32_ComputerSystem |
+            Select-Object @{N="RAM_GB";E={
+              [math]::Round($_.TotalPhysicalMemory / 1GB, 2)
+            }}
+
+      - name: Keep job active briefly
+        shell: pwsh
+        run: |
+          Write-Host "This is a temporary GitHub runner."
+          Start-Sleep -Seconds 60
+          Write-Host "Job completed."
+          
